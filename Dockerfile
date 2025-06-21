@@ -1,6 +1,7 @@
-FROM ghcr.io/stephengpope/no-code-architects-toolkit:latest AS base
+# 公式イメージは Docker Hub 配信
+FROM stephengpope/no-code-architects-toolkit:latest AS base
 
-# JP fonts 追加
+# --- JP fonts 追加 ---
 USER root
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
