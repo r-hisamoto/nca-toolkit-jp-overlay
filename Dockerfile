@@ -9,3 +9,6 @@ RUN apt-get update && \
     fc-cache -fv && \
     rm -rf /var/lib/apt/lists/*
 USER 1000
+
+# 環境変数を設定
+ENV API_KEY=dummy-key
