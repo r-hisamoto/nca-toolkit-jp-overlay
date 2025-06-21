@@ -1,0 +1,19 @@
+name: Build JP Image
+on:
+  push: { branches: [main] }
+  schedule:
+    - cron: '15 3 * * *'   # 毎日 12:15 JST
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+      - run: gcloud auth configure-docker gcr.io -q
+      - run: |
+          IMAGE=gcr.io/${{ secrets.GCP_PROJECT }}/nca-toolkit-jp:latest
+          docker build -t $IMAGE .
+          docker push $IMAGE
