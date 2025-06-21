@@ -5,7 +5,7 @@ FROM stephengpope/no-code-architects-toolkit:latest AS base
 USER root
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        fonts-noto-cjk fonts-noto-sans-cjk && \
+        fonts-noto-cjk && \
     fc-cache -fv && \
     rm -rf /var/lib/apt/lists/*
 USER 1000
