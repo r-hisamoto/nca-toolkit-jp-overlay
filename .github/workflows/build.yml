@@ -10,10 +10,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: google-github-actions/setup-gcloud@v2
         with:
-          project_id: ${{ secrets.GCP_PROJECT }}
+          project_id: 'nca-toolkit-438301'
           service_account_key: ${{ secrets.GCP_SA_KEY }}
       - run: gcloud auth configure-docker gcr.io -q
       - run: |
-          IMAGE=gcr.io/${{ secrets.GCP_PROJECT }}/nca-toolkit-jp:latest
+          IMAGE=gcr.io/nca-toolkit-438301/nca-toolkit-jp:latest
           docker build -t $IMAGE .
           docker push $IMAGE
