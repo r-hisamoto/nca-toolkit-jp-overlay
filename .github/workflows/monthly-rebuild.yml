@@ -1,0 +1,33 @@
+name: Monthly Rebuild
+on:
+  schedule:
+    - cron: '15 3 1 * *' # 毎月1日の12:15 JST (UTC+9)
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # for Workload Identity Federation
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker gcr.io -q
+
+      - name: Build and push image
+        run: |
+          IMAGE=gcr.io/${{ secrets.GCP_PROJECT }}/nca-toolkit-jp-full:ci-$(date +%Y%m%d)
+          docker build -t $IMAGE .
+          docker push $IMAGE
