@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gke-gpu-sa
+  namespace: default
+  annotations:
+    iam.gke.io/gcp-service-account: gke-gpu-sa@nca-toolkit-438301.iam.gserviceaccount.com
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gpu-runner
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gpu-runner
+  template:
+    metadata:
+      labels:
+        app: gpu-runner
+      annotations:
+        autopilot.gke.io/no-gpu-zonal-redundancy: "true"
+    spec:
+      serviceAccountName: gke-gpu-sa
+      nodeSelector:
+        cloud.google.com/gke-accelerator: nvidia-tesla-t4
+      containers:
+      - name: runner
+        image: gcr.io/nca-toolkit-438301/nca-toolkit-gpu:v3 # As per instruction
+        resources:
+          requests:
+            nvidia.com/gpu: "1"
+            cpu: "4"
+            memory: "16Gi"
+          limits:
+            nvidia.com/gpu: "1"
+            cpu: "4"
+            memory: "16Gi"
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: gpu-runner-hpa
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: gpu-runner
+  minReplicas: 1
+  maxReplicas: 4
+  metrics:
+  - type: Resource
+    resource:
+      name: nvidia.com/gpu
+      target:
+        type: Utilization
+        averageUtilization: 70

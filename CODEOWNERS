@@ -1,0 +1,4 @@
+/docker/          @infra-team
+/k8s/             @infra-team
+/deploy/          @ops-team
+/docs/            @dev-lead
