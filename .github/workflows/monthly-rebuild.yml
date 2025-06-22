@@ -1,5 +1,7 @@
 name: Monthly Rebuild
 on:
+  workflow_dispatch:
+    inputs: {}
   schedule:
     - cron: '15 3 1 * *' # 毎月1日の12:15 JST (UTC+9)
 
