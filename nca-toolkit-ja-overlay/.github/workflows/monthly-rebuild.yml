@@ -1,6 +1,7 @@
 name: monthly-rebuild
 on:
   workflow_dispatch:
+    inputs: {}
   schedule:
     - cron:  '15 21 30 * *'
 jobs:
