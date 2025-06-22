@@ -1,0 +1,28 @@
+name: monthly-rebuild
+on:
+  workflow_dispatch:
+  schedule:
+    - cron:  '15 21 30 * *'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy: { matrix: { variant: [cpu, gpu] } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
+        with: { credentials_json: ${{ secrets.GCP_SA_KEY }} }
+      - uses: google-github-actions/setup-gcloud@v2
+        with: { project_id: ${{ secrets.GCP_PROJECT }} }
+      - run: gcloud auth configure-docker gcr.io -q
+      - name: Build & Push
+        run: |
+          IMAGE=gcr.io/${{ secrets.GCP_PROJECT }}/nca-toolkit-jp-full:${{ matrix.variant }}-$(date +%Y%m)
+          docker build -f docker/Dockerfile.${{ matrix.variant }} -t $IMAGE .
+          docker push $IMAGE
+      - name: Smoke test
+        run: |
+          docker run -d --name test -p 8080:8080 $IMAGE
+          sleep 15
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:8080/v1/media/convert/mp3)
+          docker rm -f test
+          test "$code" = "422"
